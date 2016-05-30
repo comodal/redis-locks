@@ -1,4 +1,4 @@
-package com.fabahaba.redis.locks.lua;
+package com.fabahaba.redis.lua.locks;
 
 import java.util.UUID;
 

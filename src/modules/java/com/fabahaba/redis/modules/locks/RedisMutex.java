@@ -1,4 +1,4 @@
-package com.fabahaba.redis.locks.modules;
+package com.fabahaba.redis.modules.locks;
 
 import com.fabahaba.jedipus.cmds.Cmd;
 import com.fabahaba.redis.locks.AcquireReply;
