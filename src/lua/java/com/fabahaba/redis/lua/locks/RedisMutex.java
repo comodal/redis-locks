@@ -1,11 +1,7 @@
 package com.fabahaba.redis.lua.locks;
 
-import java.util.UUID;
-
 import com.fabahaba.jedipus.client.RedisClient;
-import com.fabahaba.jedipus.cluster.Node;
 import com.fabahaba.jedipus.cluster.RedisClusterExecutor;
-import com.fabahaba.jedipus.cluster.RedisClusterExecutor.ReadMode;
 import com.fabahaba.jedipus.cmds.Cmd;
 import com.fabahaba.jedipus.cmds.CmdByteArray;
 import com.fabahaba.jedipus.cmds.RESP;
@@ -66,55 +62,5 @@ public final class RedisMutex {
 
     return CmdByteArray.startBuilding(EVALSHA_RELEASE_RAW, 5).addArg(TRY_RELEASE.getSha1HexBytes())
         .addArg(NUM_KEYS).addSlotKey(lockName).addArg(ownerId).create();
-  }
-
-  public static void main(final String[] args) {
-    readme();
-  }
-
-  static void readme() {
-    final String lockName = "MY_LOCK";
-    final String ownerId = UUID.randomUUID().toString();
-    final long pexpire = 2000;
-
-    final CmdByteArray<AcquireReply> acquireCmd =
-        RedisMutex.createDirectAcquireArgs(lockName, ownerId, pexpire);
-
-    final CmdByteArray<String> releaseCmd = RedisMutex.createDirectReleaseArgs(lockName, ownerId);
-
-    try (final RedisClusterExecutor rce =
-        RedisClusterExecutor.startBuilding(Node.create("localhost", 7000)).create()) {
-
-      RedisMutex.loadMissingScripts(rce);
-
-      for (;;) {
-        final AcquireReply lockOwners = rce.apply(ReadMode.MASTER, acquireCmd.getSlot(),
-            client -> RedisMutex.TRY_ACQUIRE.eval(client, acquireCmd), 1);
-
-        if (lockOwners.getCurrentOwner().equals(ownerId)) {
-          try {
-            System.out.format("Lock '%s' acquired by '%s'.%n", lockName, ownerId);
-            break;
-          } finally {
-            // Even if tryReleaseLock fails for any reason (network errors) the lock will expire
-            // after pexpire has elapsed. null is returned if the lock was no longer owned.
-            final String released = rce.apply(ReadMode.MASTER, acquireCmd.getSlot(),
-                client -> RedisMutex.TRY_RELEASE.eval(client, releaseCmd), 0);
-
-            if (released != null && released.equals(ownerId)) {
-              System.out.format("Lock '%s' was released by '%s'.%n", lockName, ownerId);
-            } else {
-              System.out.format("Lock '%s' was no longer owned by '%s'.%n", lockName, ownerId);
-            }
-          }
-        }
-
-        System.out.format("Waiting for %dms before retrying.", lockOwners.getTTLMillis());
-        Thread.sleep(lockOwners.getTTLMillis());
-      }
-    } catch (final InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException(e);
-    }
   }
 }
