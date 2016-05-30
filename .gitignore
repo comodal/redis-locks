@@ -1,0 +1,8 @@
+.gradle
+build/
+/bin/
+/local.props
+/.settings/
+/.classpath
+/.project
+redis/modules/*.xo
