@@ -41,7 +41,7 @@ int MutexTryAcquire_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
   const char *currentOwnerStringPtr = RedisModule_StringDMA(lockKey, &currentOwnerLen, REDISMODULE_READ);
   const char *requestingOwnerStringPtr = RedisModule_StringPtrLen(requestingOwner, &requestingOwnerLen);
 
-  if (currentOwnerLen == requestingOwnerLen && strcmp(currentOwnerStringPtr, requestingOwnerStringPtr) == 0) {
+  if (currentOwnerLen == requestingOwnerLen && memcmp(currentOwnerStringPtr, requestingOwnerStringPtr, currentOwnerLen) == 0) {
 
     mstime_t px;
     if (RedisModule_StringToLongLong(argv[3], &px) != REDISMODULE_OK) {
@@ -93,7 +93,7 @@ int MutexTryRelease_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
   const char *currentOwnerStringPtr = RedisModule_StringDMA(lockKey, &currentOwnerLen, REDISMODULE_READ);
   const char *requestingOwnerStringPtr = RedisModule_StringPtrLen(requestingOwner, &requestingOwnerLen);
 
-  if (currentOwnerLen == requestingOwnerLen && strcmp(currentOwnerStringPtr, requestingOwnerStringPtr) == 0) {
+  if (currentOwnerLen == requestingOwnerLen && memcmp(currentOwnerStringPtr, requestingOwnerStringPtr, currentOwnerLen) == 0) {
     RedisModule_DeleteKey(lockKey);
     RedisModule_ReplyWithString(ctx, requestingOwner);
   } else {

@@ -11,5 +11,4 @@ public class RedisMutex {
 
   public static final Cmd<String> TRY_RELEASE = Cmd.createStringReply("LOCKS.MUTEX.TRY.RELEASE");
   public static final Cmd<byte[]> TRY_RELEASE_RAW = Cmd.createCast("LOCKS.MUTEX.TRY.RELEASE");
-
 }
