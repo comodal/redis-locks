@@ -4,6 +4,7 @@
 You can compile the module for darwin and linux using `make` in this directory.
 
 docker run --rm -v `pwd`/redis/:/tmp [jamespedwards42/alpine-gcc-make](https://hub.docker.com/r/jamespedwards42/alpine-gcc-make/~/dockerfile/) /bin/sh -c 'cd modules && make'
+
 redis> MODULE LOAD /path/to/redis/modules/locks.so
 
 ## LOCKS.MUTEX
