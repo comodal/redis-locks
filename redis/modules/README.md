@@ -7,7 +7,7 @@ Tries to acquire the lock if it is not currently owned by anyone else.  If the l
 #### Return value
 [Array reply](http://redis.io/topics/protocol#array-reply):  The previous owner (possibly null), the current owner and the time to live in milliseconds.
 
-####Examples
+####Example
 redis> LOCKS.MUTEX.TRY.ACQUIRE myLock myId 1000
 
 1. null
@@ -33,13 +33,17 @@ Frees the lock if it is currently held by `ownerId`.
 #### Return value
 [Bulk string reply](http://redis.io/topics/protocol#bulk-string-reply):  The owner at the time of this call.
 
-####Examples
+####Example
 redis> LOCKS.MUTEX.TRY.TRY_RELEASE myLock myId
 
 null
 
-redis> LOCKS.MUTEX.TRY.ACQUIRE myLock myId 1000
+redis> LOCKS.MUTEX.TRY.ACQUIRE myLock myId 2000
 
 1. null
 2. "myId"
-3. 1000
+3. 2000
+
+redis> LOCKS.MUTEX.TRY.TRY_RELEASE myLock myId
+
+"myId"
