@@ -6,3 +6,4 @@ build/
 /.classpath
 /.project
 redis/modules/*.xo
+redis/modules/*.so

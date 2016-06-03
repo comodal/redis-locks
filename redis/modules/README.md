@@ -1,7 +1,9 @@
 # Locks API Reference
 
 ## Compiling & Loading
-You can compile the module for darwin and linux using `make` in this directory.  And then load the module with:
+You can compile the module for darwin and linux using `make` in this directory.
+
+    docker run --rm -v `pwd`/redis/:/tmp jamespedwards42/alpine-gcc-make /bin/sh -c 'cd modules && make clean && make'
 
     MODULE LOAD /path/to/master/redis/modules/locks.so
 

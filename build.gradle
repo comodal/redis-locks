@@ -84,17 +84,23 @@ task rmRedis(type:Exec) {
   commandLine './scripts/rmRedis.sh', project.name
 }
 
-test.dependsOn startRedis
-test.finalizedBy rmRedis
-
 task latestRedisModule(type:Exec) {
   commandLine 'wget', '-O', 'redis/redismodule.h', 'https://raw.githubusercontent.com/antirez/redis/unstable/src/redismodule.h'
 }
 
 task compileIntegModules(type:Exec) {
   String dir = System.getProperty("user.dir");
-  commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'jamespedwards42/alpine-gcc-make:latest', '/bin/sh', '-c', 'cd modules && make clean && make'
+  commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'jamespedwards42/alpine-gcc-make:latest', '/bin/sh', '-c', 'cd modules && make'
 }
+
+task makeClean(type:Exec) {
+  commandLine 'rm', '-rf', '*.xo', '*.so'
+}
+
+test.dependsOn makeClean
+test.dependsOn compileIntegModules
+test.dependsOn startRedis
+test.finalizedBy rmRedis
 
 compileIntegModules.dependsOn latestRedisModule
 
