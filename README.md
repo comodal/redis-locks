@@ -4,8 +4,9 @@
 
 * If you are only interested in the C module see the [Modules README](https://github.com/jamespedwards42/redis-locks/tree/master/redis/modules#locks-api-reference).
 * If you are only interested in the Lua scripts see [redis-locks/src/lua/resources/redis/locks](src/lua/resources/redis/locks).  They are self documented.
-* If you are interested the Java client library, which uses [Jedipus](https://github.com/jamespedwards42/jedipus#jedipus------), continue below:
+* If you are interested in the Java client library, which uses [Jedipus](https://github.com/jamespedwards42/jedipus#jedipus------), continue below.
 * If you are interested in distributed Google Guava services built on top of these locks see [redis-distributable-services](https://github.com/jamespedwards42/distributable-services/tree/master/redis#redis-distributable-services------).
+* Pull requests, lock ideas and feature requests are welcome.
 
 ## MUTEX
 The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, when the previous owner is null, have your service acquire the lock twice, effectively waiting for two full checkin periods.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
