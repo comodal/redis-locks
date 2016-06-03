@@ -10,19 +10,7 @@
 ## MUTEX
 The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, when the previous owner is null, have your service acquire the lock twice, effectively waiting for two full checkin periods.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
 
-######Dependency Management
-```groovy
-repositories {
-   jcenter()
-}
-
-dependencies {
-   compile 'com.fabahaba:jedipus:+'
-   compile 'com.fabahaba:redis-locks:+'
-}
-```
-
-######Basic Usage Demos
+#####Basic Usage Demos
 
 >Note: The examples auto close the `RedisClientExecutor` but you probably want it to be a long lived object.
 
