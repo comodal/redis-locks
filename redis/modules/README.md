@@ -3,9 +3,8 @@
 ## Compiling & Loading
 You can compile the module for darwin and linux using `make` in this directory.
 
-    docker run --rm -v `pwd`/redis/:/tmp jamespedwards42/alpine-gcc-make /bin/sh -c 'cd modules && make clean && make'
-
-    MODULE LOAD /path/to/master/redis/modules/locks.so
+docker run --rm -v `pwd`/redis/:/tmp [jamespedwards42/alpine-gcc-make](https://hub.docker.com/r/jamespedwards42/alpine-gcc-make/~/dockerfile/) /bin/sh -c 'cd modules && make'
+redis> MODULE LOAD /path/to/redis/modules/locks.so
 
 ## LOCKS.MUTEX
 The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, when the previous owner is null, have your service acquire the lock twice, effectively waiting for two full checkin periods.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
