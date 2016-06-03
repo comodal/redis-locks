@@ -7,9 +7,9 @@ import com.fabahaba.jedipus.cmds.Cmds;
 import com.fabahaba.jedipus.executor.RedisClientExecutor;
 import com.fabahaba.redis.locks.AcquireReply;
 
-public final class ReadMe {
+public final class ReadMeExample {
 
-  private ReadMe() {}
+  private ReadMeExample() {}
 
   public static void main(final String[] args) {
     cmodule();
@@ -21,7 +21,7 @@ public final class ReadMe {
     final String pexpire = "2000";
 
     try (final RedisClientExecutor rce =
-        RedisClientExecutor.startBuilding().create(() -> Node.create("localhost", 9736))) {
+        RedisClientExecutor.startBuilding().createPooled(() -> Node.create("localhost", 6379))) {
 
       rce.accept(
           client -> client.sendCmd(Cmds.MODULE, Cmds.MODULE_LOAD, "/redis/modules/locks.so"));

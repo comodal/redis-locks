@@ -8,16 +8,15 @@ import com.fabahaba.jedipus.cluster.RedisClusterExecutor.ReadMode;
 import com.fabahaba.jedipus.cmds.CmdByteArray;
 import com.fabahaba.redis.locks.AcquireReply;
 
-public final class ReadMe {
+public final class ReadMeExample {
 
-  private ReadMe() {}
+  private ReadMeExample() {}
 
   public static void main(final String[] args) {
     lua();
   }
 
   static void lua() {
-
     final String lockName = "MY_LOCK";
     final String ownerId = UUID.randomUUID().toString();
     final long pexpire = 2000;
