@@ -1,4 +1,4 @@
-##Redis-Locks [![Build Status](https://img.shields.io/travis/jamespedwards42/redis-locks.svg?branch=master)](https://travis-ci.org/jamespedwards42/redis-locks) [![Bintray](https://api.bintray.com/packages/jamespedwards42/libs/redis-locks/images/download.svg) ](https://bintray.com/jamespedwards42/libs/redis-locks/_latestVersion) [![license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/jamespedwards42/redis-locks/master/LICENSE)
+#Redis-Locks [![Build Status](https://img.shields.io/travis/jamespedwards42/redis-locks.svg?branch=master)](https://travis-ci.org/jamespedwards42/redis-locks) [![Bintray](https://api.bintray.com/packages/jamespedwards42/libs/redis-locks/images/download.svg) ](https://bintray.com/jamespedwards42/libs/redis-locks/_latestVersion) [![license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/jamespedwards42/redis-locks/master/LICENSE)
 
 >Distributed systems locks implemented in both Redis Lua scripts and C modules.  A Java client library is also provided for making calls and loading the locks to Redis.
 
@@ -6,6 +6,9 @@
 * If you are only interested in the Lua scripts see [redis-locks/src/lua/resources/redis/locks](src/lua/resources/redis/locks).  They are self documented.
 * If you are interested the Java client library, which uses [Jedipus](https://github.com/jamespedwards42/jedipus#jedipus------), continue below:
 * If you are interested in distributed Google Guava services built on top of these locks see [redis-distributable-services](https://github.com/jamespedwards42/distributable-services/tree/master/redis#redis-distributable-services------).
+
+## MUTEX
+The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, when the previous owner is null, have your service acquire the lock twice, effectively waiting for two full checkin periods.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
 
 ######Dependency Management
 ```groovy
@@ -19,12 +22,11 @@ dependencies {
 }
 ```
 
-## MUTEX
-The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, when the previous owner is null, have your service acquire the lock twice, effectively waiting for two full checkin periods.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
+######Basic Usage Demos
 
-#### [Demo Module Usage](src/readme/java/com/fabahaba/redis/modules/locks/ReadMeExample.java#L18)
+>Note: The examples auto close the `RedisClientExecutor` but you probably want it to be a long lived object.
 
->Note: The example auto close the `RedisClientExecutor` but you probably want it to be a long lived object.
+###### [C Module Usage](src/readme/java/com/fabahaba/redis/modules/locks/ReadMeExample.java#L18)
 
 ```java
 final String lockName = "MY_LOCK";
@@ -53,10 +55,7 @@ try (final RedisClientExecutor rce =
 }
 ```
 
-#### [Demo Lua Usage](src/readme/java/com/fabahaba/redis/lua/locks/ReadMeExample.java#L19)
-
->Note: The example auto close the `RedisClusterExecutor` but you probably want it to be a long lived object.
-
+###### [Lua Usage](src/readme/java/com/fabahaba/redis/lua/locks/ReadMeExample.java#L19)
 ```java
 final String lockName = "MY_LOCK";
 final String ownerId = UUID.randomUUID().toString();
