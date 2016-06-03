@@ -1,7 +1,12 @@
 # Locks API reference
 
+## Compiling & Loading
+You can compile the module for darwin and linux using `make` in this directory.  And then load the module with:
+
+    MODULE LOAD /path/to/master/redis/modules/locks.so
+
 ## LOCKS.MUTEX
-The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, have your service acquire the lock twice, effectively waiting 2 full checkin periods, when the previous owner is null.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
+The intended usage of this lock is to serve leader elections amongst distributed services.  Be aware that after a failover of your Redis server a new service could claim leadership before your previous leader has realized it has lost leadership.  To protect against this corner case, have your service acquire the lock twice, effectively waiting two full checkin periods, when the previous owner is null.  This will ensure that the previous leader has attempted to refresh its claim and discovered it is no longer the leader.
 
 ### `LOCKS.MUTEX.TRY.ACQUIRE lockName ownerId pexpire`
 ------
