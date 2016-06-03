@@ -37,7 +37,7 @@ Frees the lock if it is currently held by `ownerId`.
 [Bulk string reply](http://redis.io/topics/protocol#bulk-string-reply):  The owner at the time of this call.
 
 ####Example
-redis> LOCKS.MUTEX.TRY.TRY_RELEASE myLock myId
+redis> LOCKS.MUTEX.TRY.RELEASE myLock myId
 
 null
 
@@ -47,6 +47,6 @@ redis> LOCKS.MUTEX.TRY.ACQUIRE myLock myId 2000
 2. "myId"
 3. 2000
 
-redis> LOCKS.MUTEX.TRY.TRY_RELEASE myLock myId
+redis> LOCKS.MUTEX.TRY.RELEASE myLock myId
 
 "myId"
