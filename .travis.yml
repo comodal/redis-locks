@@ -18,16 +18,8 @@ branches:
     - master
     - /^redis-locks-.*$/
 
-env:
-   - GRADLE_VERSION="2.14-rc-3"
-
 before_install:
    - "export COMMIT_MSG=\"$(git log --format=%B --no-merges -n 1)\""
-   - wget https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip
-   - unzip gradle-$GRADLE_VERSION-bin.zip
-   - export GRADLE_HOME=$PWD/gradle-$GRADLE_VERSION
-   - export PATH=$GRADLE_HOME/bin:$PATH
-   - docker pull redis:alpine
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -39,6 +31,6 @@ cache:
 
 install: /bin/true
 
-script: if [ ! -z "$TRAVIS_TAG" ] || [[ "$COMMIT_MSG" != 'Release redis-locks'* ]] ; then gradle check; fi
+script: if [ ! -z "$TRAVIS_TAG" ] || [[ "$COMMIT_MSG" != 'Release redis-locks'* ]] ; then ./gradlew check; fi
 
-after_success: if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ ! -z "$TRAVIS_TAG" ] ; then gradle bintrayUpload; fi
+after_success: if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ ! -z "$TRAVIS_TAG" ] ; then ./gradlew bintrayUpload; fi

@@ -2,7 +2,6 @@
 #include <string.h>
 
 int MutexTryAcquire_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-
   if (argc != 4) {
     return RedisModule_WrongArity(ctx);
   }
@@ -19,7 +18,6 @@ int MutexTryAcquire_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
   RedisModule_ReplyWithArray(ctx, 3);
 
   if (keyType == REDISMODULE_KEYTYPE_EMPTY) {
-
     mstime_t px;
     if (RedisModule_StringToLongLong(argv[3], &px) != REDISMODULE_OK) {
       RedisModule_CloseKey(lockKey);
@@ -42,7 +40,6 @@ int MutexTryAcquire_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
   const char *requestingOwnerStringPtr = RedisModule_StringPtrLen(requestingOwner, &requestingOwnerLen);
 
   if (currentOwnerLen == requestingOwnerLen && memcmp(currentOwnerStringPtr, requestingOwnerStringPtr, currentOwnerLen) == 0) {
-
     mstime_t px;
     if (RedisModule_StringToLongLong(argv[3], &px) != REDISMODULE_OK) {
       RedisModule_CloseKey(lockKey);
@@ -68,7 +65,6 @@ int MutexTryAcquire_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
 }
 
 int MutexTryRelease_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-
   if (argc != 3) {
     return RedisModule_WrongArity(ctx);
   }
@@ -76,7 +72,6 @@ int MutexTryRelease_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
   RedisModuleKey *lockKey = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
 
   int keyType = RedisModule_KeyType(lockKey);
-
   if (keyType == REDISMODULE_KEYTYPE_EMPTY) {
     RedisModule_CloseKey(lockKey);
     RedisModule_ReplyWithNull(ctx);
@@ -104,19 +99,15 @@ int MutexTryRelease_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, 
   return REDISMODULE_OK;
 }
 
-int RedisModule_OnLoad(RedisModuleCtx *ctx) {
-
+int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
    if (RedisModule_Init(ctx, "locks", 1, REDISMODULE_APIVER_1) == REDISMODULE_ERR) {
      return REDISMODULE_ERR;
    }
-
    if (RedisModule_CreateCommand(ctx, "locks.mutex.try.acquire", MutexTryAcquire_RedisCommand, "write deny-oom fast", 1, 1, 1) == REDISMODULE_ERR) {
      return REDISMODULE_ERR;
    }
-
    if (RedisModule_CreateCommand(ctx, "locks.mutex.try.release", MutexTryRelease_RedisCommand, "write fast", 1, 1, 1) == REDISMODULE_ERR) {
      return REDISMODULE_ERR;
    }
-
    return REDISMODULE_OK;
 }
