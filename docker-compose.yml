@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  redis:
+    ports:
+      - "9736:9736"
+    volumes:
+      - ./redis/modules:/redis/modules
+    image: jamespedwards42/alpine-redis:unstable
+    command: ['--port', '9736', '--protected-mode', 'no', '--save', '''', '--appendfsync', 'no']

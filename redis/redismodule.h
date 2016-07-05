@@ -96,9 +96,11 @@ typedef void (*RedisModuleTypeFreeFunc)(void *value);
 
 #define REDISMODULE_API_FUNC(x) (*x)
 
+
 void *REDISMODULE_API_FUNC(RedisModule_Alloc)(size_t bytes);
 void *REDISMODULE_API_FUNC(RedisModule_Realloc)(void *ptr, size_t bytes);
 void REDISMODULE_API_FUNC(RedisModule_Free)(void *ptr);
+void *REDISMODULE_API_FUNC(RedisModule_Calloc)(size_t nmemb, size_t size);
 char *REDISMODULE_API_FUNC(RedisModule_Strdup)(const char *str);
 int REDISMODULE_API_FUNC(RedisModule_GetApi)(const char *, void *);
 int REDISMODULE_API_FUNC(RedisModule_CreateCommand)(RedisModuleCtx *ctx, const char *name, RedisModuleCmdFunc cmdfunc, const char *strflags, int firstkey, int lastkey, int keystep);
@@ -122,8 +124,9 @@ size_t REDISMODULE_API_FUNC(RedisModule_CallReplyLength)(RedisModuleCallReply *r
 RedisModuleCallReply *REDISMODULE_API_FUNC(RedisModule_CallReplyArrayElement)(RedisModuleCallReply *reply, size_t idx);
 RedisModuleString *REDISMODULE_API_FUNC(RedisModule_CreateString)(RedisModuleCtx *ctx, const char *ptr, size_t len);
 RedisModuleString *REDISMODULE_API_FUNC(RedisModule_CreateStringFromLongLong)(RedisModuleCtx *ctx, long long ll);
+RedisModuleString *REDISMODULE_API_FUNC(RedisModule_CreateStringFromString)(RedisModuleCtx *ctx, const RedisModuleString *str);
 void REDISMODULE_API_FUNC(RedisModule_FreeString)(RedisModuleCtx *ctx, RedisModuleString *str);
-const char *REDISMODULE_API_FUNC(RedisModule_StringPtrLen)(RedisModuleString *str, size_t *len);
+const char *REDISMODULE_API_FUNC(RedisModule_StringPtrLen)(const RedisModuleString *str, size_t *len);
 int REDISMODULE_API_FUNC(RedisModule_ReplyWithError)(RedisModuleCtx *ctx, const char *err);
 int REDISMODULE_API_FUNC(RedisModule_ReplyWithSimpleString)(RedisModuleCtx *ctx, const char *msg);
 int REDISMODULE_API_FUNC(RedisModule_ReplyWithArray)(RedisModuleCtx *ctx, long len);
@@ -133,8 +136,8 @@ int REDISMODULE_API_FUNC(RedisModule_ReplyWithString)(RedisModuleCtx *ctx, Redis
 int REDISMODULE_API_FUNC(RedisModule_ReplyWithNull)(RedisModuleCtx *ctx);
 int REDISMODULE_API_FUNC(RedisModule_ReplyWithDouble)(RedisModuleCtx *ctx, double d);
 int REDISMODULE_API_FUNC(RedisModule_ReplyWithCallReply)(RedisModuleCtx *ctx, RedisModuleCallReply *reply);
-int REDISMODULE_API_FUNC(RedisModule_StringToLongLong)(RedisModuleString *str, long long *ll);
-int REDISMODULE_API_FUNC(RedisModule_StringToDouble)(RedisModuleString *str, double *d);
+int REDISMODULE_API_FUNC(RedisModule_StringToLongLong)(const RedisModuleString *str, long long *ll);
+int REDISMODULE_API_FUNC(RedisModule_StringToDouble)(const RedisModuleString *str, double *d);
 void REDISMODULE_API_FUNC(RedisModule_AutoMemory)(RedisModuleCtx *ctx);
 int REDISMODULE_API_FUNC(RedisModule_Replicate)(RedisModuleCtx *ctx, const char *cmdname, const char *fmt, ...);
 int REDISMODULE_API_FUNC(RedisModule_ReplicateVerbatim)(RedisModuleCtx *ctx);
@@ -180,6 +183,7 @@ RedisModuleString *REDISMODULE_API_FUNC(RedisModule_LoadString)(RedisModuleIO *i
 char *REDISMODULE_API_FUNC(RedisModule_LoadStringBuffer)(RedisModuleIO *io, size_t *lenptr);
 void REDISMODULE_API_FUNC(RedisModule_SaveDouble)(RedisModuleIO *io, double value);
 double REDISMODULE_API_FUNC(RedisModule_LoadDouble)(RedisModuleIO *io);
+void REDISMODULE_API_FUNC(RedisModule_Log)(RedisModuleCtx *ctx, const char *level, const char *fmt, ...);
 
 /* This is included inline inside each Redis module. */
 static int RedisModule_Init(RedisModuleCtx *ctx, const char *name, int ver, int apiver) __attribute__((unused));
@@ -187,6 +191,7 @@ static int RedisModule_Init(RedisModuleCtx *ctx, const char *name, int ver, int 
     void *getapifuncptr = ((void**)ctx)[0];
     RedisModule_GetApi = (int (*)(const char *, void *)) (unsigned long)getapifuncptr;
     REDISMODULE_GET_API(Alloc);
+    REDISMODULE_GET_API(Calloc);
     REDISMODULE_GET_API(Free);
     REDISMODULE_GET_API(Realloc);
     REDISMODULE_GET_API(Strdup);
@@ -225,6 +230,7 @@ static int RedisModule_Init(RedisModuleCtx *ctx, const char *name, int ver, int 
     REDISMODULE_GET_API(CreateStringFromCallReply);
     REDISMODULE_GET_API(CreateString);
     REDISMODULE_GET_API(CreateStringFromLongLong);
+    REDISMODULE_GET_API(CreateStringFromString);
     REDISMODULE_GET_API(FreeString);
     REDISMODULE_GET_API(StringPtrLen);
     REDISMODULE_GET_API(AutoMemory);
@@ -270,6 +276,7 @@ static int RedisModule_Init(RedisModuleCtx *ctx, const char *name, int ver, int 
     REDISMODULE_GET_API(SaveDouble);
     REDISMODULE_GET_API(LoadDouble);
     REDISMODULE_GET_API(EmitAOF);
+    REDISMODULE_GET_API(Log);
 
     RedisModule_SetModuleAttribs(ctx,name,ver,apiver);
     return REDISMODULE_OK;

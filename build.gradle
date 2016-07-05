@@ -1,9 +1,10 @@
 plugins {
+  id 'com.gradle.build-scan' version '1.0'
   id 'java'
   id 'eclipse'
-  id 'pl.allegro.tech.build.axion-release' version '1.3.4'
+  id 'pl.allegro.tech.build.axion-release' version '1.3.5'
   id 'maven-publish'
-  id 'com.jfrog.bintray' version '1.6'
+  id 'com.jfrog.bintray' version '1.7'
   id 'findbugs'
   id 'checkstyle'
 }
@@ -30,6 +31,11 @@ project.group = 'com.fabahaba'
 project.version = scmVersion.version
 
 sourceCompatibility = 1.8
+
+buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+}
 
 repositories {
   jcenter()
@@ -63,8 +69,6 @@ sourceSets {
   }
 }
 
-project.ext.set('redisServerPort', '9736')
-
 test {
   outputs.upToDateWhen { false }
   testLogging {
@@ -73,36 +77,36 @@ test {
     showStackTraces true
     exceptionFormat "full"
   }
-  systemProperty 'redislocks.redis.port', project.redisServerPort
+  systemProperty 'redislocks.redis.port', '9736'
 }
 
 task startRedis(type:Exec) {
-  commandLine './scripts/startRedis.sh', project.name, project.redisServerPort
+  commandLine 'docker-compose', 'up', '-d'
 }
 
 task rmRedis(type:Exec) {
-  commandLine './scripts/rmRedis.sh', project.name
+  commandLine 'docker-compose', 'down'
 }
 
-task latestRedisModule(type:Exec) {
-  commandLine 'wget', '-O', 'redis/redismodule.h', 'https://raw.githubusercontent.com/antirez/redis/unstable/src/redismodule.h'
+task wgetRedisModule(type:Exec) {
+  commandLine 'wget', '-N', '-O', 'redis/redismodule.h', 'https://raw.githubusercontent.com/antirez/redis/unstable/src/redismodule.h'
 }
 
 task compileIntegModules(type:Exec) {
   String dir = System.getProperty("user.dir");
-  commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'jamespedwards42/alpine-gcc-make:latest', '/bin/sh', '-c', 'cd modules && make'
+  commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", '-w', '/tmp/modules', 'jamespedwards42/alpine-gcc-make:latest', '/bin/sh', '-c', 'make'
 }
 
 task makeClean(type:Exec) {
-  commandLine 'rm', '-rf', '*.xo', '*.so'
+  workingDir 'redis/modules'
+  commandLine 'make', 'clean'
 }
 
-test.dependsOn makeClean
-test.dependsOn compileIntegModules
+compileIntegModules.dependsOn wgetRedisModule
+startRedis.dependsOn compileIntegModules
 test.dependsOn startRedis
 test.finalizedBy rmRedis
-
-compileIntegModules.dependsOn latestRedisModule
+rmRedis.finalizedBy makeClean
 
 task sourcesJar(type: Jar, dependsOn: classes) {
   from sourceSets.main.allSource
