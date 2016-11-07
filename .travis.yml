@@ -1,7 +1,7 @@
 sudo: required
 dist: trusty
-services:
-  - docker
+group: edge
+services: docker
 
 notifications:
   email:
@@ -10,8 +10,7 @@ notifications:
 
 language: java
 
-jdk:
-  - oraclejdk8
+jdk: oraclejdk8
 
 branches:
   only:
@@ -19,7 +18,7 @@ branches:
     - /^redis-locks-.*$/
 
 env:
-  DOCKER_COMPOSE_VERSION: 1.7.1
+  DOCKER_COMPOSE_VERSION: 1.8.1
 
 before_install:
   - sudo DEBIAN_FRONTEND=noninteractive apt-get --yes --force-yes -o Dpkg::Options::="--force-confnew" install docker-engine
@@ -37,7 +36,7 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-install: /bin/true
+install: ./gradlew -version
 
 script: if [ ! -z "$TRAVIS_TAG" ] || [[ "$COMMIT_MSG" != 'Release redis-locks'* ]] ; then ./gradlew check; fi
 
