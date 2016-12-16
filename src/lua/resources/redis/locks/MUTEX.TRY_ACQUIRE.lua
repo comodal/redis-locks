@@ -6,15 +6,11 @@
 
 local lockName = KEYS[1];
 local lockOwner = ARGV[1];
-
 local owner = redis.call('get', lockName);
 
 if not owner or owner == lockOwner then
-
    local px = tonumber(ARGV[2]);
-
    redis.call('set', lockName, lockOwner, 'PX', px);
-
    return {owner, lockOwner, px};
 end
 

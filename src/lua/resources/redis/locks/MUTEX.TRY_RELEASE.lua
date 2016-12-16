@@ -3,7 +3,6 @@
 
 local lockName = KEYS[1];
 local lockOwner = ARGV[1];
-
 local currentOwner = redis.call('get', lockName);
 
 if lockOwner == currentOwner then
