@@ -1,4 +1,5 @@
-# Redis-Locks [![Build Status](https://img.shields.io/travis/comodal/redis-locks.svg?branch=master)](https://travis-ci.org/comodal/redis-locks) [![Bintray](https://api.bintray.com/packages/comodal/libraries/redis-locks/images/download.svg) ](https://bintray.com/comodal/libraries/redis-locks/_latestVersion) [![license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/comodal/redis-locks/master/LICENSE)
+# Redis-Locks [![Build Status](https://img.shields.io/travis/comodal/redis-locks.svg?branch=master)](https://travis-ci.org/comodal/redis-locks) [![Bintray](https://api.bintray.com/packages/comodal/libraries/redis-locks/images/download.svg) ](https://bintray.com/comodal/libraries/redis-locks/_latestVersion) [![license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/comodal/redis-locks/master/LICENSE) [![codecov](https://codecov.io/gh/comodal/redis-locks/branch/master/graph/badge.svg)](https://codecov.io/gh/comodal/redis-locks)
+
 
 >Distributed systems locks implemented in both Redis Lua scripts and C modules.  A Java client library is also provided for making calls and loading the locks to Redis.
 
