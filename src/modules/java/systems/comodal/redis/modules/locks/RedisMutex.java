@@ -3,7 +3,9 @@ package systems.comodal.redis.modules.locks;
 import com.fabahaba.jedipus.cmds.Cmd;
 import systems.comodal.redis.locks.AcquireReply;
 
-public class RedisMutex {
+public final class RedisMutex {
+
+  private RedisMutex() {}
 
   public static final Cmd<AcquireReply> TRY_ACQUIRE =
       Cmd.create("LOCKS.MUTEX.TRY.ACQUIRE", AcquireReply.ACQUIRE_REPLY_ADAPTER);
