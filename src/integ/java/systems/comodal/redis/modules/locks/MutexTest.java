@@ -5,14 +5,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.UUID;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.fabahaba.jedipus.client.RedisClient;
 import com.fabahaba.jedipus.cmds.Cmds;
 import com.fabahaba.jedipus.cmds.RESP;
+import java.util.UUID;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import systems.comodal.redis.client.BaseRedisClientTest;
 import systems.comodal.redis.locks.AcquireReply;
 

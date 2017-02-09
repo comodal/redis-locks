@@ -1,15 +1,15 @@
 package systems.comodal.redis.modules.locks;
 
-import java.util.UUID;
-
 import com.fabahaba.jedipus.cluster.Node;
 import com.fabahaba.jedipus.cmds.Cmds;
 import com.fabahaba.jedipus.executor.RedisClientExecutor;
+import java.util.UUID;
 import systems.comodal.redis.locks.AcquireReply;
 
 public final class ReadMeExample {
 
-  private ReadMeExample() {}
+  private ReadMeExample() {
+  }
 
   public static void main(final String[] args) {
     cmodule();

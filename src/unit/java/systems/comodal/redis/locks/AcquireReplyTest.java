@@ -1,9 +1,9 @@
 package systems.comodal.redis.locks;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import org.junit.Test;
 
 public class AcquireReplyTest {
 
@@ -13,7 +13,8 @@ public class AcquireReplyTest {
     assertNull(testReply.getPreviousOwner());
     assertEquals("owner", testReply.getCurrentOwner());
     assertEquals(1L, testReply.getTTLMillis());
-    assertEquals("AcquireReply{previousOwner=null, currentOwner='owner', ttlMillis=1}", testReply.toString());
+    assertEquals("AcquireReply{previousOwner=null, currentOwner='owner', ttlMillis=1}",
+        testReply.toString());
 
     testReply = new AcquireReply("owner", "newOwner", 1L);
     assertEquals("owner", testReply.getPreviousOwner());

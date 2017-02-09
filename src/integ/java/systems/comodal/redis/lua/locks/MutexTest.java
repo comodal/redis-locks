@@ -5,18 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.UUID;
-
+import com.fabahaba.jedipus.client.RedisClient;
 import com.fabahaba.jedipus.cluster.Node;
 import com.fabahaba.jedipus.cluster.RedisClusterExecutor;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.fabahaba.jedipus.client.RedisClient;
 import com.fabahaba.jedipus.cmds.CmdByteArray;
 import com.fabahaba.jedipus.cmds.RESP;
-
+import java.util.UUID;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import systems.comodal.redis.client.BaseRedisClientTest;
 import systems.comodal.redis.locks.AcquireReply;
 
@@ -32,7 +28,7 @@ public class MutexTest extends BaseRedisClientTest {
   @Test
   public void testClusterLoad() {
     try (final RedisClusterExecutor rce =
-             RedisClusterExecutor.startBuilding(Node.create("localhost", 7379)).create()) {
+        RedisClusterExecutor.startBuilding(Node.create("localhost", 7379)).create()) {
       RedisMutex.loadMissingScripts(rce);
     }
   }

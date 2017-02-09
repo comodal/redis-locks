@@ -1,99 +1,81 @@
-plugins {
-  id 'java'
-  id 'pl.allegro.tech.build.axion-release' version '1.4.1'
-  id 'maven-publish'
-  id 'com.jfrog.bintray' version '1.7.3'
-  id 'findbugs'
-  id 'checkstyle'
-  id 'jacoco'
-}
-
-scmVersion {
-  tag {
-    prefix = project.name
-  }
-  repository {
-    if (project.hasProperty("AXION_RELEASE_GITHUB_TOKEN")) {
-      customUsername = "$AXION_RELEASE_GITHUB_TOKEN"
+buildscript {
+    apply from: 'https://raw.githubusercontent.com/comodal/gradle-conf/master/plugins.gradle'
+    dependencies {
+        classpath "$axion"
+        classpath "$bintray"
     }
-  }
-  createReleaseCommit true
-  releaseCommitMessage { version, position -> "Release $project.name-$version" }
-  checks {
-    uncommittedChanges = false
-  }
 }
 
-project.group = 'systems.comodal'
-project.version = scmVersion.version
-
-sourceCompatibility = 1.8
-
-repositories {
-  jcenter()
+ext {
+    desc = 'Distributed systems locks backed by Redis.'
 }
+apply from: 'https://raw.githubusercontent.com/comodal/gradle-conf/master/java/java.gradle'
+apply from: 'https://raw.githubusercontent.com/comodal/gradle-conf/master/axion.gradle'
+apply from: 'https://raw.githubusercontent.com/comodal/gradle-conf/master/comodal.gradle'
+apply from: 'https://raw.githubusercontent.com/comodal/gradle-conf/master/java/bintray-maven.gradle'
+apply from: 'https://raw.githubusercontent.com/comodal/gradle-conf/master/java/checks.gradle'
+apply plugin: 'findbugs'
 
 dependencies {
-  compile 'com.fabahaba:jedipus:+'
-  testCompile 'junit:junit:+'
+    compile 'com.fabahaba:jedipus:+'
 }
 
 sourceSets {
-  main {
-    java {
-      srcDir 'src/core/java'
-      srcDir 'src/modules/java'
-      srcDir 'src/lua/java'
+    main {
+        java {
+            srcDir 'src/core/java'
+            srcDir 'src/modules/java'
+            srcDir 'src/lua/java'
+        }
+        resources {
+            srcDir 'src/lua/resources'
+        }
     }
-    resources {
-      srcDir 'src/lua/resources'
+    test {
+        java {
+            srcDir 'src/unit/java'
+            srcDir 'src/integ/java'
+        }
+        resources {
+            srcDir 'src/unit/resources'
+            srcDir 'src/integ/resources'
+        }
     }
-  }
-  test {
-    java {
-      srcDir 'src/unit/java'
-      srcDir 'src/integ/java'
-    }
-    resources {
-      srcDir 'src/unit/resources'
-      srcDir 'src/integ/resources'
-    }
-  }
 }
 
 test {
-  outputs.upToDateWhen { false }
-  testLogging {
-    events "failed", "standardOut", "standardError"
-    showExceptions true
-    showStackTraces true
-    exceptionFormat "full"
-  }
-  systemProperty 'redislocks.redis.port', '9736'
+    outputs.upToDateWhen { false }
+    testLogging {
+        events "failed", "standardOut", "standardError"
+        showExceptions true
+        showStackTraces true
+        exceptionFormat "full"
+    }
+    systemProperty 'redislocks.redis.port', '9736'
 }
 
-task startRedis(type:Exec) {
-  commandLine 'docker-compose', 'up', '-d'
+task startRedis(type: Exec) {
+    commandLine 'docker-compose', 'up', '-d'
 }
 
-task rmRedis(type:Exec) {
-  commandLine 'docker-compose', 'down'
+task rmRedis(type: Exec) {
+    commandLine 'docker-compose', 'down'
 }
 
 task getRedisModule() {
-  OutputStream moduleHeaderFile = new File('./redis/redismodule.h').newOutputStream()
-  moduleHeaderFile << new URL('https://raw.githubusercontent.com/antirez/redis/unstable/src/redismodule.h').openStream()
-  moduleHeaderFile.close()
+    OutputStream moduleHeaderFile = new File('./redis/redismodule.h').newOutputStream()
+    moduleHeaderFile << new URL('https://raw.githubusercontent.com/antirez/redis/unstable/src/redismodule.h').openStream()
+    moduleHeaderFile.close()
 }
 
-task compileIntegModules(type:Exec) {
-  String dir = System.getProperty("user.dir");
-  commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'comodal/alpine-gcc-make:latest', '/bin/sh', '-c', 'make -B -C /tmp/modules'
+task compileIntegModules(type: Exec) {
+    String dir = System.getProperty("user.dir");
+    commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'comodal/alpine-gcc-make:latest', '/bin/sh', '-c', 'make -B -C /tmp/modules'
 }
 
-task makeClean(type:Exec) {
-  String dir = System.getProperty("user.dir");
-  commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'comodal/alpine-gcc-make:latest', '/bin/sh', '-c', 'make -C /tmp/modules clean'
+task makeClean(type: Exec) {
+    String dir = System.getProperty("user.dir");
+    commandLine 'docker', 'run', '--rm', '-v', "$dir/redis/:/tmp", 'comodal/alpine-gcc-make:latest', '/bin/sh', '-c', 'make -C /tmp/modules clean'
 }
 
 compileIntegModules.dependsOn getRedisModule
@@ -102,108 +84,38 @@ test.dependsOn startRedis
 test.finalizedBy rmRedis
 rmRedis.finalizedBy makeClean
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-  from sourceSets.main.allSource
-  classifier = 'sources'
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  from javadoc.destinationDir
-  classifier 'javadoc'
-}
-
-publishing {
-  publications {
-    mavenJava( MavenPublication ) {
-      from components.java
-      artifact sourcesJar
-      artifact javadocJar
-    }
-  }
-}
-
-artifacts {
-  archives sourcesJar
-  archives javadocJar
-}
-
-bintray {
-  user = System.getenv('BINTRAY_USER')
-  key = System.getenv('BINTRAY_API_KEY')
-  publications = ['mavenJava']
-  pkg {
-    userOrg = 'comodal'
-    repo = 'libraries'
-    name = project.name
-    desc = 'Distributed systems locks backed by Redis.'
-    websiteUrl = 'https://github.com/comodal/' + project.name
-    vcsUrl = 'https://github.com/comodal/' + project.name
-    issueTrackerUrl = 'https://github.com/comodal/' + project.name + '/issues'
-    licenses = ["Apache-2.0"]
-    publish = true
-    version {
-       name = project.version
-       vcsTag = scmVersion.tag.prefix + '-' + project.version
-       gpg {
-          sign = true
-          passphrase = System.getenv('BINTRAY_GPG_PASSPHRASE')
-       }
-    }
-  }
-}
-
-bintrayUpload.onlyIf { !project.version.endsWith( 'SNAPSHOT' ) }
-
 findbugs {
-  toolVersion = "+"
-  effort = "max"
-  reportLevel = "low"
-  ignoreFailures = false
-  excludeFilter = file("findbugs-exclude.xml")
+    toolVersion = "+"
+    effort = "max"
+    reportLevel = "low"
+    ignoreFailures = false
 }
 
 tasks.withType(FindBugs) {
-  reports {
-    xml.enabled = false
-    html.enabled = true
-  }
-}
-
-checkstyle {
-  config = resources.text.fromFile("checkstyle/google_checks.xml")
-  toolVersion = "+"
-  ignoreFailures = false
-}
-
-jacoco {
-  toolVersion = "+"
-}
-
-jacocoTestReport {
-  reports {
-    xml.enabled = true
-    html.enabled = true
-  }
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
 }
 
 gradle.addListener(new TestEventLogger())
 
 class TestEventLogger implements org.gradle.api.tasks.testing.TestListener {
 
-  void beforeSuite(TestDescriptor suite) {
-    if(suite.getClassName() != null) {
-      println 'Running ' + suite.getClassName() + ' test suite.'
+    void beforeSuite(TestDescriptor suite) {
+        if (suite.getClassName() != null) {
+            println 'Running ' + suite.getClassName() + ' test suite.'
+        }
     }
-  }
 
-  void afterSuite(TestDescriptor suite, TestResult result) {
-  }
+    void afterSuite(TestDescriptor suite, TestResult result) {
+    }
 
-  void beforeTest(TestDescriptor test) {
-    println '\n' + test.getName() + ' STARTED @ ' + new Date().toTimestamp()
-  }
+    void beforeTest(TestDescriptor test) {
+        println '\n' + test.getName() + ' STARTED @ ' + new Date().toTimestamp()
+    }
 
-  void afterTest(TestDescriptor test, TestResult result) {
-    println test.getName() + ' ' + result.getResultType() + ' in ' + (result.getEndTime() - result.getStartTime()) + 'ms.'
-  }
+    void afterTest(TestDescriptor test, TestResult result) {
+        println test.getName() + ' ' + result.getResultType() + ' in ' + (result.getEndTime() - result.getStartTime()) + 'ms.'
+    }
 }
